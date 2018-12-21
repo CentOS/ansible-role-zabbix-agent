@@ -1,0 +1,17 @@
+policy_module(centos-zabbix-agent, 1.0)
+
+require{
+ type zabbix_agent_t;
+ type zabbix_t;
+ type ping_t;
+ type zabbix_tmp_t;
+}
+
+allow ping_t zabbix_tmp_t:file read_file_perms;
+allow ping_t zabbix_t:tcp_socket { read write };
+
+kernel_read_network_state(zabbix_agent_t)
+domain_read_all_domains_state(zabbix_agent_t)
+dev_read_sysfs(zabbix_agent_t)
+corenet_tcp_connect_all_ports(zabbix_agent_t)
+

@@ -1,0 +1,4 @@
+#!/bin/bash
+zabbix_sender -z {{ zabbix_server }} -s $(hostname) -k sys.net.ip_conntrack -o $(wc -l /proc/net/nf_conntrack|awk '{print $1}') > /dev/null
+
+

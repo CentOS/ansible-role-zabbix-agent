@@ -1,0 +1,71 @@
+- name: Installing Zabbix packages
+  yum: 
+    name: "{{ item }}"
+    state: installed 
+  with_items:
+    - zabbix-agent
+    - zabbix-sender
+    - bc
+- name: Configuring iptables rules
+  include_role:
+    name: iptables
+    tasks_from: custom-policy
+  vars:
+    iptables_policy_name: zabbix-agent
+    iptables_protocol: tcp
+    iptables_port: "10050"
+    iptables_source: "{{ zabbix_server_ip }}"
+  tags:
+    - iptables
+
+- name: Installing selinux dependency packages
+  yum: 
+    name: "{{ item }}" 
+    state: installed
+  with_items:
+    - libsemanage-python
+    - policycoreutils-python
+  tags:
+    - packages
+
+- name: Distributing custom selinux policies
+  copy: 
+    src: "selinux/{{ ansible_distribution_version[0] }}/{{ item }}" 
+    dest: "/etc/selinux/centos/{{ item }}"
+  register: sepolicy
+  with_items:
+    - centos-zabbix-agent.pp
+
+- name: reload custom selinux files
+  shell: /usr/sbin/semodule -u "/etc/selinux/centos/centos-zabbix-agent.pp"
+  when: ansible_selinux.status == "enabled" and sepolicy.changed
+
+- name: Allowing zabbix to connect to network resources
+  seboolean: 
+    name: zabbix_can_network 
+    persistent: yes 
+    state: yes
+  when: ansible_selinux.status == "enabled" 
+
+- name: Configuring Zabbix agentd
+  template: 
+    src: zabbix_agentd.conf.j2 
+    dest: /etc/zabbix/zabbix_agentd.conf
+  notify: restart_zabbix_agent
+    
+- name: Ensuring we have a directory to put zabbix scripts
+  file:
+    state: directory
+    path: /usr/lib/zabbix
+    mode: 0770
+    owner: zabbix
+    group: zabbix
+
+- name: Enabling Zabbix service
+  service: 
+    name: "{{ item }}" 
+    state: started 
+    enabled: yes
+  with_items: 
+    - zabbix-agent
+
