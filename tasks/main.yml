@@ -52,7 +52,7 @@
     src: zabbix_agentd.conf.j2 
     dest: /etc/zabbix/zabbix_agentd.conf
   notify: restart_zabbix_agent
-    
+
 - name: Ensuring we have a directory to put zabbix scripts
   file:
     state: directory
@@ -60,6 +60,14 @@
     mode: 0770
     owner: zabbix
     group: zabbix
+
+- name: Adding some other conf files under zabbix_agentd.d
+  template: 
+    src: "{{ item }}.j2" 
+    dest: "/etc/zabbix/zabbix_agentd.d/{{ item }}"
+  notify: restart_zabbix_agent
+  with_items:
+    - interface-alias.conf
 
 - name: Enabling Zabbix service
   service: 
