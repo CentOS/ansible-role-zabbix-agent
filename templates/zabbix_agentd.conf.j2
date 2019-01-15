@@ -1,8 +1,12 @@
+Hostname={{ inventory_hostname }}
+Server={{ zabbix_server }}
+ServerActive={{ zabbix_server }}
 PidFile=/var/run/zabbix/zabbix_agentd.pid
 LogFile=/var/log/zabbix/zabbix_agentd.log
 LogFileSize=10
 EnableRemoteCommands=0
-Server={{ zabbix_server }}
-ServerActive={{ zabbix_server }}
-Hostname={{ inventory_hostname }}
+Include=/etc/zabbix/zabbix_agentd.d/
+RefreshActiveChecks=180
+BufferSend=5
+BufferSize=100
 
