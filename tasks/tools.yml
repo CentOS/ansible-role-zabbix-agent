@@ -1,0 +1,39 @@
+- name: Ensuring we have areca cli for wrapper scripts
+  copy:
+    src: "{{ filestore }}/tools/areca/{{ ansible_architecture }}/areca-cli"
+    dest: /usr/local/bin/areca-cli
+    mode: 0755
+  when: ansible_architecture == 'x86_64' or ansible_architecture == 'i386'
+
+- name: Ensuring we have 3ware/tw_cli for wrapper scripts
+  copy:
+    src: "{{ filestore }}/tools/3ware/{{ ansible_architecture }}/tw_cli"
+    dest: /usr/local/bin/tw_cli
+    mode: 0755
+  when: ansible_architecture == 'x86_64' or ansible_architecture == 'i386'
+
+- name: Some basic wrapper scripts for zabbix-sender
+  copy:
+    src: "scripts/{{ item }}"
+    dest: "/usr/lib/zabbix/{{ item }}"
+    mode: 0755
+  with_items:
+    - zabbix-hw-raid-check.sh
+    - zabbix-mdstat-check.sh
+    - zabbix-check-eth-settings.sh
+    - zabbix-check-iptables.sh
+    - zabbix-check-ro.sh
+
+- name: Ensuring we have some cron jobs for zabbix-sender wrapper scripts
+  cron:
+    name: "Zabbix sender wrapper script {{ item }}"
+    minute: "*/30"
+    job: "/usr/lib/zabbix/{{ item }}"
+    user: root
+  with_items:
+    - zabbix-hw-raid-check.sh
+    - zabbix-mdstat-check.sh
+    - zabbix-check-eth-settings.sh
+    - zabbix-check-iptables.sh
+    - zabbix-check-ro.sh
+

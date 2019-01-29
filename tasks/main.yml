@@ -77,3 +77,4 @@
   with_items: 
     - zabbix-agent
 
+- include_tasks: tools.yml
