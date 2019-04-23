@@ -1,7 +1,7 @@
 - name: Installing Zabbix packages
   yum: 
     name: "{{ item }}"
-    state: installed 
+    state: latest 
   with_items:
     - zabbix-agent
     - zabbix-sender
