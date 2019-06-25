@@ -1,2 +1,2 @@
-Alias=net.if.default.out:net.if.out[{{ ansible_default_ipv4.interface }}]
-Alias=net.if.default.in:net.if.in[{{ ansible_default_ipv4.interface }}]
+Alias=net.if.default.out:net.if.out[{{ ansible_default_ipv4.interface | default('eth0') }}]
+Alias=net.if.default.in:net.if.in[{{ ansible_default_ipv4.interface | default('eth0')}}]
