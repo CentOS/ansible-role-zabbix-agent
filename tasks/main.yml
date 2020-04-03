@@ -1,11 +1,15 @@
+- name: Importing specific distro variables
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution }}-{{ ansible_distribution_major_version }}.yml"
+    - "{{ ansible_distribution }}.yml"
+    - common.yml
+
 - name: Installing Zabbix packages
   yum: 
-    name: "{{ item }}"
+    name: "{{ zabbix_pkgs_list }}"
     state: latest 
-  with_items:
-    - zabbix-agent
-    - zabbix-sender
-    - bc
+
 - name: Configuring iptables rules
   include_role:
     name: iptables
@@ -20,11 +24,8 @@
 
 - name: Installing selinux dependency packages
   yum: 
-    name: "{{ item }}" 
+    name: "{{ pkgs_list }}" 
     state: installed
-  with_items:
-    - libsemanage-python
-    - policycoreutils-python
   tags:
     - packages
 

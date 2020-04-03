@@ -1,0 +1,8 @@
+pkgs_list:
+  - libsemanage-python
+  - policycoreutils-python
+
+zabbix_pkgs_list:
+  - zabbix-agent
+  - zabbix-sender
+  - bc
