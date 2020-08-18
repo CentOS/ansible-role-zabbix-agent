@@ -66,6 +66,8 @@
   template: 
     src: "{{ item }}.j2" 
     dest: "/etc/zabbix/zabbix_agentd.d/{{ item }}"
+    owner: zabbix
+    mode: 0666
   notify: restart_zabbix_agent
   with_items:
     - interface-alias.conf
