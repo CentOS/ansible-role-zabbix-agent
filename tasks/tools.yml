@@ -1,9 +1,38 @@
+- name: Importing ansible facts wrapper for hba
+  copy:
+    src: "scripts/hba_facts"
+    dest: "/usr/libexec/centos/hba_facts"
+    mode: 0755
+  register: hba_facts_script
+
+- name: Calling hba_script if dropped/new
+  command: /usr/libexec/centos/hba_facts
+  register: hba_facts
+  when: hba_facts_script is changed
+
+- name: Forcing reloading ansible facts if needed
+  setup:
+    filter: ansible_local
+  when: hba_facts is changed  
+
+- block: 
+  - name: Importing MegaCli rpm if needed
+    copy:
+      follow: True
+      src: "{{ filestore }}/tools/MegaCli.noarch.rpm"
+      dest: "/root/MegaCli.noarch.rpm"
+  - name: Installing MegaCli rpm
+    yum:
+      name: /root/MegaCli.noarch.rpm
+      state: installed
+  when: ansible_local.hba.adapters.megaraid_sas 
+
 - name: Ensuring we have areca cli for wrapper scripts
   copy:
     src: "{{ filestore }}/tools/areca/{{ ansible_architecture }}/areca-cli"
     dest: /usr/local/bin/areca-cli
     mode: 0755
-  when: ansible_architecture == 'x86_64' or ansible_architecture == 'i386'
+  when: ansible_architecture == 'x86_64' or ansible_architecture == 'i386' 
 
 - name: Ensuring we have 3ware/tw_cli for wrapper scripts
   copy:

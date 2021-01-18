@@ -49,7 +49,6 @@ done
 
 function megaraid_sas_check() {
 echo "Megaraid_sas controller found .. launching raid check" >> $logfile
-test -e /opt/MegaRAID/MegaCli/MegaCli64 || yum install -y -d0 MegaCli
 for LDid in $(/opt/MegaRAID/MegaCli/MegaCli64 -LDInfo -Lall -aALL|grep "Virtual Drive:"|awk '{print $3}') ;
 do
   /opt/MegaRAID/MegaCli/MegaCli64 -LDInfo -L${LDid} -aALL|grep -q Optimal 

@@ -1,0 +1,12 @@
+#!/bin/bash
+PATH=$PATH:/usr/local/bin:/sbin:/usr/sbin/
+
+fact_file="/etc/ansible/facts.d/hba.fact"
+cat > ${fact_file} << EOF
+[adapters]
+EOF
+
+for kmod in 3w_9xxx 3w_xxxx arcmsr megaraid_sas; do
+  lsmod|egrep -q ${kmod} && echo "${kmod}=True" >> $fact_file || echo "${kmod}=False" >> $fact_file 
+done
+
