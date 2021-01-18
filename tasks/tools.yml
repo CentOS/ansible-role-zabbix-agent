@@ -25,7 +25,7 @@
     yum:
       name: /root/MegaCli.noarch.rpm
       state: installed
-  when: ansible_local.hba.adapters.megaraid_sas 
+  when: ansible_local.hba.adapters.megaraid_sas == "True" 
 
 - name: Ensuring we have areca cli for wrapper scripts
   copy:
