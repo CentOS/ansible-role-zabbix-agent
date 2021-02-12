@@ -9,4 +9,11 @@ Include=/etc/zabbix/zabbix_agentd.d/
 RefreshActiveChecks=180
 BufferSend=5
 BufferSize=100
+{% if zabbix_agent_tls %}
+# Settings for TLS/PSK between agent and proxy/server
+TLSAccept=psk
+TLSConnect=psk
+TLSPSKIdentity={{ zabbix_agent_tls_psk_identity }}
+TLSPSKFile=/etc/zabbix/zabbix_agent.psk
+{% endif %}
 

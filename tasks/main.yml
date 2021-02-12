@@ -54,6 +54,16 @@
     dest: /etc/zabbix/zabbix_agentd.conf
   notify: restart_zabbix_agent
 
+- name: Distributing PSK file for TLS
+  template:
+    src: zabbix_agent.psk.j2
+    dest: /etc/zabbix/zabbix_agent.psk
+    owner: zabbix
+    group: zabbix
+    mode: 0640
+  notify: restart_zabbix_agent
+  when: zabbix_agent_tls
+
 - name: Ensuring we have a directory to put zabbix scripts
   file:
     state: directory
