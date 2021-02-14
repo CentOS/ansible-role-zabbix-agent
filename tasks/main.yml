@@ -9,6 +9,7 @@
   yum: 
     name: "{{ zabbix_pkgs_list }}"
     state: latest 
+  register: pkg_install
 
 - name: Configuring iptables rules
   include_role:
@@ -63,6 +64,7 @@
     mode: 0640
   notify: restart_zabbix_agent
   when: zabbix_agent_tls
+  register: zabbix_psk
 
 - name: Ensuring we have a directory to put zabbix scripts
   file:
@@ -91,3 +93,18 @@
     - zabbix-agent
 
 - include_tasks: tools.yml
+
+# Ensuring we talk to zabbix API to reflect PSK change
+- name: Updating PSK on Zabbix Server through API
+  command:
+    cmd: "/usr/libexec/centos/zapi-update-agent-psk
+         -n {{ inventory_hostname }}
+         -p {{ zabbix_agent_tls_psk }}
+         -i {{ zabbix_agent_tls_psk_identity }}
+         "
+  delegate_to: "{{ zabbix_api_srv }}"
+  when: 
+    - zabbix_psk is changed 
+    - pkg_install is not changed
+    - zabbix_api_srv is defined
+    - zabbix_api_srv != 'None'
