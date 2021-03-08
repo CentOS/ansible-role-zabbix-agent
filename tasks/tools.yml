@@ -41,6 +41,13 @@
     mode: 0755
   when: ansible_architecture == 'x86_64' or ansible_architecture == 'i386'
 
+- name: Ensuring we have arcconf for wrapper scripts
+  copy:
+    src: "{{ filestore }}/tools/aacraid/{{ ansible_architecture }}/arcconf"
+    dest: /usr/local/bin/arcconf
+    mode: 0755
+  when: ansible_local.hba.adapters.aacraid == "True"
+    
 - name: Some basic wrapper scripts for zabbix-sender
   copy:
     src: "scripts/{{ item }}"

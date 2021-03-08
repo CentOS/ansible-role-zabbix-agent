@@ -6,7 +6,7 @@ cat > ${fact_file} << EOF
 [adapters]
 EOF
 
-for kmod in 3w_9xxx 3w_xxxx arcmsr megaraid_sas; do
+for kmod in 3w_9xxx 3w_xxxx arcmsr megaraid_sas aacraid; do
   lsmod|egrep -q ${kmod} && echo "${kmod}=True" >> $fact_file || echo "${kmod}=False" >> $fact_file 
 done
 
