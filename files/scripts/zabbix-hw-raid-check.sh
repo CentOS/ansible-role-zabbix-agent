@@ -64,12 +64,32 @@ do
 done
 }
 
+function aacraid_check() {
+echo "Adaptec aacraid controller found .. launching raid check" >> $logfile
+controllers_found=$(arcconf |grep 'Controllers found:'|cut -f 2 -d ':'|tr -d [:blank:])
+for i in $(seq 1 ${controllers_found}) ; do
+  ld_num=$(arcconf getconfig ${i} LD|egrep -c "Logical Device number")
+  ld_last=$(( ${ld_num} -1 )) # it starts a zero
+  for ld_index in $(seq 0 ${ld_last}); do
+    status=$(arcconf getconfig 1 LD ${ld_index}|grep "Status of Logical Device"|cut -f 2 -d ':'|tr -d [:blank:])
+    if [ "$status" == "Optimal" ] ; then
+      echo "Status for LD ${ld_index} on controller $i is : $status" >>$logfile
+      zabbix_sender -c /etc/zabbix/zabbix_agentd.conf -k hwraid.aacraid -o 0 >/dev/null
+    else
+      echo "Status for LD ${ld_index} on controller $i is : $status" >>$logfile
+      zabbix_sender -c /etc/zabbix/zabbix_agentd.conf -k hwraid.aacraid -o 1 >/dev/null
+      exit 1
+    fi
+  done
+done
+}
+
 init_log
 
 # Ensuring sg kmod is loaded, as needed by those tools ...
 lsmod|grep -q sg || modprobe sg
 
-for kmod in 3w_9xxx 3w_xxxx arcmsr megaraid_sas; do
+for kmod in 3w_9xxx 3w_xxxx arcmsr megaraid_sas aacraid; do
   /sbin/lsmod |grep -q ${kmod}
   if [ "$?" = "0" ];then
     ${kmod}_check
