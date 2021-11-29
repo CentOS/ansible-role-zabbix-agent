@@ -108,3 +108,21 @@
     - pkg_install is not changed
     - zabbix_api_srv is defined
     - zabbix_api_srv != 'None'
+
+# applying host macros if defined
+- name: Reflecting host macros in zabbix
+  command:
+    cmd: "/usr/libexec/centos/zabbix_host_tool
+         -n {{ inventory_hostname }} 
+         -m {{ item.name }} 
+         -v {{ item.value }}
+         "
+  with_items: "{{ zabbix_host_macros }}"
+  register: zbx_macros_result
+  changed_when: "zbx_macros_result.rc == 2"
+  failed_when: "zbx_macros_result.rc == 1"
+  delegate_to: "{{ zabbix_api_srv }}"       
+  when: 
+    - zabbix_api_srv is defined
+    - zabbix_api_srv != 'None'
+

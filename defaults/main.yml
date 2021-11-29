@@ -7,3 +7,11 @@ zabbix_agent_tls: False
 zabbix_agent_tls_psk:           # gen with `openssl rand -hex 32` and also known by zabbix server
 zabbix_agent_tls_psk_identity:  # Whatever makes sense to you and known by zabbix server
 
+# Zabbix host macros we want to control through ansible
+# This is just a list of zabbix macro name and value to update
+# example:
+# zabbix_host_macros:
+#   - name: foo
+#     value: 5
+# Empty list by default so nothing to add/modify    
+zabbix_host_macros: []     
