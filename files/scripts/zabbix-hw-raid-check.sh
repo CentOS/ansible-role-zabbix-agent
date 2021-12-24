@@ -49,18 +49,21 @@ done
 
 function megaraid_sas_check() {
 echo "Megaraid_sas controller found .. launching raid check" >> $logfile
-for LDid in $(/opt/MegaRAID/MegaCli/MegaCli64 -LDInfo -Lall -aALL|grep "Virtual Drive:"|awk '{print $3}') ;
-do
-  /opt/MegaRAID/MegaCli/MegaCli64 -LDInfo -L${LDid} -aALL|grep -q Optimal 
-  if [ "$?" -ne "0" ] ;then
-    /opt/MegaRAID/MegaCli/MegaCli64 -ShowSummary -aALL >>$logfile
-    zabbix_sender -c /etc/zabbix/zabbix_agentd.conf -k hwraid.megaraid -o 1 >/dev/null
-    exit 1
-  else
-    echo "Megaraid_sas array ${array} status : OK" >> $logfile
-    /opt/MegaRAID/MegaCli/MegaCli64 -ShowSummary -aALL >>$logfile
-    zabbix_sender -c /etc/zabbix/zabbix_agentd.conf -k hwraid.megaraid -o 0 >/dev/null  
-  fi
+for CtrlID in $(/opt/MegaRAID/MegaCli/MegaCli64 -LDInfo -Lall -aAll|grep "Adapter"|awk '{print $2}') ;
+  do
+    for LDid in $(/opt/MegaRAID/MegaCli/MegaCli64 -LDInfo -Lall -a${CtrlID}|grep "Virtual Drive:"|awk '{print $3}') ;
+    do
+    /opt/MegaRAID/MegaCli/MegaCli64 -LDInfo -L${LDid} -a${CtrlID}|grep -q Optimal 
+    if [ "$?" -ne "0" ] ;then
+      /opt/MegaRAID/MegaCli/MegaCli64 -ShowSummary -aALL >>$logfile
+      zabbix_sender -c /etc/zabbix/zabbix_agentd.conf -k hwraid.megaraid -o 1 >/dev/null
+      exit 1
+    else
+      echo "Megaraid_sas array ${array} status : OK" >> $logfile
+      /opt/MegaRAID/MegaCli/MegaCli64 -ShowSummary -aALL >>$logfile
+      zabbix_sender -c /etc/zabbix/zabbix_agentd.conf -k hwraid.megaraid -o 0 >/dev/null  
+    fi
+  done
 done
 }
 
