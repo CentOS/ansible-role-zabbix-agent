@@ -61,10 +61,11 @@ for CtrlID in $(/opt/MegaRAID/MegaCli/MegaCli64 -LDInfo -Lall -aAll|grep "Adapte
     else
       echo "Megaraid_sas array ${array} status : OK" >> $logfile
       /opt/MegaRAID/MegaCli/MegaCli64 -ShowSummary -aALL >>$logfile
-      zabbix_sender -c /etc/zabbix/zabbix_agentd.conf -k hwraid.megaraid -o 0 >/dev/null  
     fi
-  done
+    done
 done
+# We made it here so it's all good for all controllers
+zabbix_sender -c /etc/zabbix/zabbix_agentd.conf -k hwraid.megaraid -o 0 >/dev/null  
 }
 
 function aacraid_check() {
