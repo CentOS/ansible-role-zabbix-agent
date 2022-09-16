@@ -1,0 +1,9 @@
+pkgs_list:
+  - policycoreutils-python-utils
+
+zabbix_pkgs_list:
+  - zabbix-agent
+  - zabbix-sender
+  - bc
+  - ncurses-compat-libs  # Needed for some megacli tools and raid monitoring checks through zabbix_sender
+
