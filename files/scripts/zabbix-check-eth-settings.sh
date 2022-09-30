@@ -7,7 +7,7 @@ else
   eth_dev=$(ip route|grep default|awk '{print $5}')
   # Specific case testing if bridge interface
   if [[ "$eth_dev" == br* ]] ; then  
-    eth_dev=$(brctl show $eth_dev|tail -n 1|awk '{print $4}')
+    eth_dev=$(brctl show $eth_dev|grep $eth_dev|awk '{print $4}')
   fi
 fi
 
