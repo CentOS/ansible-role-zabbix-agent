@@ -1,0 +1,44 @@
+#!/bin/bash
+api_key="{{ zabbix_agent_geoip_apikey }}"
+ansible_fact_file="/etc/ansible/facts.d/location.fact"
+
+# Default variables if we can't reach ipgeolocation (fw or no route)
+declare -A defaults=(
+ ["latitude"]="{{ zabbix_agent_geoip_defaults['latitude'] }}"
+ ["longitude"]="{{ zabbix_agent_geoip_defaults['longitude'] }}"
+ ["country"]="{{ zabbix_agent_geoip_defaults['country'] }}"
+ ["state"]="{{ zabbix_agent_geoip_defaults['state'] }}"
+ ["city"]="{{ zabbix_agent_geoip_defaults['city'] }}"
+ ["continent"]="{{ zabbix_agent_geoip_defaults['continent'] }}"
+)
+
+# Trying to query ipgeolocation and parsing data or just using default values instead
+geo_data=$(curl -4 --connect-timeout 5 --fail --silent "https://api.ipgeolocation.io/ipgeo?apiKey=${api_key}")
+
+if [ "$?" -eq "0" ] ; then
+  latitude=$(echo ${geo_data}|jq .latitude|tr -d '"')
+  longitude=$(echo ${geo_data}|jq .longitude|tr -d '"')
+  country=$(echo ${geo_data}|jq .country_name|tr -d '"')
+  state=$(echo ${geo_data}|jq .state|tr -d '"')
+  city=$(echo ${geo_data}|jq .city|tr -d '"')
+  continent=$(echo ${geo_data}|jq .continent_name|tr -d '"')
+else
+  latitude="${defaults["latitude"]}"
+  longitude="${defaults["longitude"]}"
+  country="${defaults["country"]}"
+  state="${defaults["state"]}"
+  city="${defaults["city"]}"
+  continent="${defaults["continent"]}"
+fi
+
+# now creating ansible fact file
+cat > ${ansible_fact_file} << EOF
+[zabbix]
+location_lat: ${latitude}
+location_lon: ${longitude}
+site_country: ${country}
+site_state: ${state}
+site_city: ${city}
+location: ${continent}
+EOF
+

@@ -163,4 +163,48 @@
     - zabbix_api_srv != 'None'
     - agent_facts is changed
 
-    
+- name: Generating geoip helper script
+  template:
+    src: scripts/geoip_query.j2
+    dest: /usr/libexec/centos/geoip_query
+    mode: '0750'
+  register: geoip_query_script  
+  tags:
+    - geoip
+  when: zabbix_agent_geoip  
+
+- name: Fetching geoip informations
+  command:
+    cmd: /usr/libexec/centos/geoip_query
+  when: geoip_query_script is changed  
+
+- name: Forcing reloading ansible location facts if needed
+  setup:
+    filter: ansible_local
+  when: geoip_query_script is changed
+
+# Updating zabbix agent inventory if changed
+- name: Reflecting agent location changes
+  command:
+    cmd: "/usr/libexec/centos/zapi-inventory-update
+         --node {{ inventory_hostname }} 
+         --inventory_key {{ item.name }} 
+         --inventory_value '{{ item.value }}'
+         "
+  loop:
+    - { name: 'location_lat', value: '{{ ansible_local.location.zabbix.location_lat }}' }
+    - { name: 'location_lon', value: '{{ ansible_local.location.zabbix.location_lon }}' }
+    - { name: 'site_country', value: '{{ ansible_local.location.zabbix.site_country }}' }
+    - { name: 'site_state', value: '{{ ansible_local.location.zabbix.site_state }}' }
+    - { name: 'site_city', value: '{{ ansible_local.location.zabbix.site_city }}' }
+    - { name: 'location', value: '{{ ansible_local.location.zabbix.location }}' }
+  loop_control:
+    label: '{{ item.name }}'
+  delegate_to: "{{ zabbix_api_srv }}"       
+  when: 
+    - zabbix_api_srv is defined
+    - zabbix_api_srv != 'None'
+    - geoip_query_script is changed
+
+
+

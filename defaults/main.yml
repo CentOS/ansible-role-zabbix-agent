@@ -15,3 +15,17 @@ zabbix_agent_tls_psk_identity:  # Whatever makes sense to you and known by zabbi
 #     value: 5
 # Empty list by default so nothing to add/modify    
 zabbix_host_macros: []     
+
+# Do we want to automatically create zabbix/ansible facts for geoip location ?
+zabbix_agent_geoip: False
+# If so we'll distribute template with ipgeolocation api key
+zabbix_agent_geoip_apikey: Create-one-on-ipgeolocation.io
+# What about default values if we can't query ipgeolocation.io
+zabbix_agent_geoip_defaults:
+  latitude: '35'
+  longitude: '-78'
+  country: USA
+  state: North Carolina
+  city: Raleigh
+  continent: North America
+
