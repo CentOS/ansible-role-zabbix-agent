@@ -126,3 +126,41 @@
     - zabbix_api_srv is defined
     - zabbix_api_srv != 'None'
 
+- name: Generating ansible facts
+  template:
+    src: agent.fact.j2
+    dest: /etc/ansible/facts.d/agent.fact
+  register: agent_facts  
+  tags:
+    - templates
+
+- name: Forcing reloading ansible facts if needed
+  setup:
+    filter: ansible_local
+  when: agent_facts is changed  
+
+# Updating zabbix agent inventory if changed
+- name: Reflecting agent inventory changes
+  command:
+    cmd: "/usr/libexec/centos/zapi-inventory-update
+         --node {{ inventory_hostname }} 
+         --inventory_key {{ item.name }} 
+         --inventory_value '{{ item.value }}'
+         "
+  loop:
+    - { name: 'hw_arch', value: '{{ ansible_local.agent.zabbix.hw_arch }}' }
+    - { name: 'type', value: '{{ ansible_local.agent.zabbix.type }}' }
+    - { name: 'vendor', value: '{{ ansible_local.agent.zabbix.vendor }}' }
+    - { name: 'model', value: '{{ ansible_local.agent.zabbix.model }}' }
+    - { name: 'serialno_a', value: '{{ ansible_local.agent.zabbix.serialno_a }}' }
+    - { name: 'os_full', value: '{{ ansible_local.agent.zabbix.os_full }}' }
+    - { name: 'os_short', value: '{{ ansible_local.agent.zabbix.os_short }}' }
+  loop_control:
+    label: '{{ item.name }}'
+  delegate_to: "{{ zabbix_api_srv }}"       
+  when: 
+    - zabbix_api_srv is defined
+    - zabbix_api_srv != 'None'
+    - agent_facts is changed
+
+    
