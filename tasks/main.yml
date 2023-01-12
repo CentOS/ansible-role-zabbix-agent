@@ -156,7 +156,7 @@
     - { name: 'os_full', value: '{{ ansible_local.agent.zabbix.os_full }}' }
     - { name: 'os_short', value: '{{ ansible_local.agent.zabbix.os_short }}' }
   loop_control:
-    label: '{{ item.name }}'
+    label: "{{ inventory_hostname }}"
   delegate_to: "{{ zabbix_api_srv }}"       
   when: 
     - zabbix_api_srv is defined
@@ -199,12 +199,11 @@
     - { name: 'site_city', value: '{{ ansible_local.location.zabbix.site_city }}' }
     - { name: 'location', value: '{{ ansible_local.location.zabbix.location }}' }
   loop_control:
-    label: '{{ item.name }}'
+    label: "{{ inventory_hostname }}"
   delegate_to: "{{ zabbix_api_srv }}"       
   when: 
     - zabbix_api_srv is defined
     - zabbix_api_srv != 'None'
     - geoip_query_script is changed
-
 
 

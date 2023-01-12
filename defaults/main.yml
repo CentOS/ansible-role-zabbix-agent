@@ -1,4 +1,7 @@
 # Defaults variables for role zabbix-agent
+# Do we want to have zabbix agent installed and monitored by proxy/server ?
+zabbix_monitoring: True
+# Which server and ip should we connect to and allow check from (iptables)
 zabbix_server: localhost
 zabbix_server_ip: 127.0.0.1
 
