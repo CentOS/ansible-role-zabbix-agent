@@ -49,12 +49,6 @@
     state: yes
   when: ansible_selinux.status == "enabled" 
 
-- name: Configuring Zabbix agentd
-  template: 
-    src: zabbix_agentd.conf.j2 
-    dest: /etc/zabbix/zabbix_agentd.conf
-  notify: restart_zabbix_agent
-
 - name: Distributing PSK file for TLS
   template:
     src: zabbix_agent.psk.j2
@@ -65,6 +59,20 @@
   notify: restart_zabbix_agent
   when: zabbix_agent_tls
   register: zabbix_psk
+
+- name: Configuring Zabbix agentd
+  template: 
+    src: zabbix_agentd.conf.j2 
+    dest: /etc/zabbix/zabbix_agentd.conf
+  notify: restart_zabbix_agent
+  register: zabbix_agent_config
+    
+- name: Forcing a Zabbix service restart directly
+  service: 
+    name: zabbix-agent
+    state: restarted 
+    enabled: yes
+  when: zabbix_agent_config is changed  
 
 - name: Ensuring we have a directory to put zabbix scripts
   file:
