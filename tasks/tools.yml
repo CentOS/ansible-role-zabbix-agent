@@ -27,6 +27,20 @@
       state: installed
   when: ansible_local.hba.adapters.megaraid_sas == "True" 
 
+- block: 
+  - name: Importing perccli2 rpm if needed
+    copy:
+      follow: True
+      src: "{{ filestore }}/tools/perccli2.x86_64.rpm"
+      dest: "/root/perccli2.x86_64.rpm"
+  - name: Installing perccli2 rpm
+    yum:
+      name: /root/perccli2.x86_64.rpm
+      disable_gpg_check: True  # Dell tool not signed by our key and distributed only through git-crypted filestore
+      state: installed
+  when: ansible_local.hba.adapters.mpi3mr == "True" 
+
+
 - name: Ensuring we have areca cli for wrapper scripts
   copy:
     src: "{{ filestore }}/tools/areca/{{ ansible_architecture }}/areca-cli"

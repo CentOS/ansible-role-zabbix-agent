@@ -68,6 +68,23 @@ done
 zabbix_sender -c /etc/zabbix/zabbix_agentd.conf -k hwraid.megaraid -o 0 >/dev/null  
 }
 
+function mpi3mr_check() {
+echo "Perc2/mpi3mr controller found .. launching raid check" >> $logfile
+# output whole controller status in log file
+/opt/MegaRAID/perccli2/perccli2 /c0 show >> $logfile
+# checking individual VD/arrays and exiting if issue found
+arrays_number=$(/opt/MegaRAID/perccli2/perccli2 /c0 show |grep "Virtual Drives"| cut -f 2 -d '=' | tr -d [:blank:])
+for i in $(seq 1 ${array_number}); do 
+  /opt/MegaRAID/perccli2/perccli2 /c0/v${i} show | egrep -v ^Optl|egrep -q Optl
+  if [ "$?" -ne "0" ] ;then
+    zabbix_sender -c /etc/zabbix/zabbix_agentd.conf -k hwraid.megaraid -o 1
+    exit 1
+  fi
+done
+
+}
+
+
 function aacraid_check() {
 echo "Adaptec aacraid controller found .. launching raid check" >> $logfile
 controllers_found=$(arcconf |grep 'Controllers found:'|cut -f 2 -d ':'|tr -d [:blank:])
@@ -93,7 +110,7 @@ init_log
 # Ensuring sg kmod is loaded, as needed by those tools ...
 lsmod|grep -q sg || modprobe sg
 
-for kmod in 3w_9xxx 3w_xxxx arcmsr megaraid_sas aacraid; do
+for kmod in 3w_9xxx 3w_xxxx arcmsr megaraid_sas mpi3mr aacraid; do
   /sbin/lsmod |grep -q ${kmod}
   if [ "$?" = "0" ];then
     ${kmod}_check
