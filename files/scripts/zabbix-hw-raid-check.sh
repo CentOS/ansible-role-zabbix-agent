@@ -81,7 +81,8 @@ for i in $(seq 1 ${array_number}); do
     exit 1
   fi
 done
-
+# We made it here so it's all good for all arrays
+zabbix_sender -c /etc/zabbix/zabbix_agentd.conf -k hwraid.megaraid -o 0 >/dev/null  
 }
 
 
