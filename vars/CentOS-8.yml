@@ -7,3 +7,4 @@ zabbix_pkgs_list:
   - bc
   - jq
   - ncurses-compat-libs  # Needed for some megacli tools and raid monitoring checks through zabbix_sender
+  - pciutils

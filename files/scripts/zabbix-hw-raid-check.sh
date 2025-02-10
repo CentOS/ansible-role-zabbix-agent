@@ -49,23 +49,41 @@ done
 
 function megaraid_sas_check() {
 echo "Megaraid_sas controller found .. launching raid check" >> $logfile
-for CtrlID in $(/opt/MegaRAID/MegaCli/MegaCli64 -LDInfo -Lall -aAll|grep "Adapter"|awk '{print $2}') ;
-  do
-    for LDid in $(/opt/MegaRAID/MegaCli/MegaCli64 -LDInfo -Lall -a${CtrlID}|grep "Virtual Drive:"|awk '{print $3}') ;
-    do
-    /opt/MegaRAID/MegaCli/MegaCli64 -LDInfo -L${LDid} -a${CtrlID}|grep -q Optimal 
-    if [ "$?" -ne "0" ] ;then
-      /opt/MegaRAID/MegaCli/MegaCli64 -ShowSummary -aALL >>$logfile
+lspci|grep RAID|egrep -q 'SAS39xx'
+if [ "$?" -eq "0" ] ; then
+  echo "Newer megaraid adapter SAS 39xx found so using perccli" >> $logfile
+  /opt/MegaRAID/perccli/perccli64 /c0 show all >> $logfile
+  /opt/MegaRAID/perccli/perccli64 /c0 /vall show |egrep RAID|while read array ; do 
+    echo $array |egrep -q Optl 
+    if [ "$?" -ne "0" ] ; then
       zabbix_sender -c /etc/zabbix/zabbix_agentd.conf -k hwraid.megaraid -o 1 >/dev/null
       exit 1
-    else
-      echo "Megaraid_sas array ${array} status : OK" >> $logfile
-      /opt/MegaRAID/MegaCli/MegaCli64 -ShowSummary -aALL >>$logfile
     fi
     done
-done
-# We made it here so it's all good for all controllers
-zabbix_sender -c /etc/zabbix/zabbix_agentd.conf -k hwraid.megaraid -o 0 >/dev/null  
+  # We made it here so it's all good for all controllers
+  zabbix_sender -c /etc/zabbix/zabbix_agentd.conf -k hwraid.megaraid -o 0 >/dev/null  
+
+else
+  echo "Older megaraid adapter found so using megacli" >> $logfile
+  for CtrlID in $(/opt/MegaRAID/MegaCli/MegaCli64 -LDInfo -Lall -aAll|grep "Adapter"|awk '{print $2}') ;
+    do
+      for LDid in $(/opt/MegaRAID/MegaCli/MegaCli64 -LDInfo -Lall -a${CtrlID}|grep "Virtual Drive:"|awk '{print $3}') ;
+      do
+      /opt/MegaRAID/MegaCli/MegaCli64 -LDInfo -L${LDid} -a${CtrlID}|grep -q Optimal 
+      if [ "$?" -ne "0" ] ;then
+        /opt/MegaRAID/MegaCli/MegaCli64 -ShowSummary -aALL >>$logfile
+        zabbix_sender -c /etc/zabbix/zabbix_agentd.conf -k hwraid.megaraid -o 1 >/dev/null
+        exit 1
+      else
+        echo "Megaraid_sas array ${array} status : OK" >> $logfile
+        /opt/MegaRAID/MegaCli/MegaCli64 -ShowSummary -aALL >>$logfile
+      fi
+      done
+  done
+  # We made it here so it's all good for all controllers
+  zabbix_sender -c /etc/zabbix/zabbix_agentd.conf -k hwraid.megaraid -o 0 >/dev/null  
+
+fi
 }
 
 function mpi3mr_check() {

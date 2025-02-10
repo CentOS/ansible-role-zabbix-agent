@@ -16,14 +16,18 @@
   when: hba_facts is changed  
 
 - block: 
-  - name: Importing MegaCli rpm if needed
+  - name: Importing MegaCli/perccli rpm if needed
     copy:
       follow: True
-      src: "{{ filestore }}/tools/MegaCli.noarch.rpm"
-      dest: "/root/MegaCli.noarch.rpm"
+      src: "{{ filestore }}/tools/{{ item }}.noarch.rpm"
+      dest: "/root/{{ item }}.noarch.rpm"
+    with_items:
+      - MegaCli
+      - perccli
   - name: Installing MegaCli rpm
     yum:
-      name: /root/MegaCli.noarch.rpm
+      name: ['/root/MegaCli.noarch.rpm' ,'/root/perccli.noarch.rpm']
+      disable_gpg_check: True  # Dell tool not signed by our key and distributed only through git-crypted filestore
       state: installed
   when: ansible_local.hba.adapters.megaraid_sas == "True" 
 
