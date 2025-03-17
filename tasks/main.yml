@@ -32,7 +32,7 @@
 
 - name: Distributing custom selinux policies
   copy: 
-    src: "selinux/{{ ansible_distribution_version[0] }}/{{ item }}" 
+    src: "selinux/{{ ansible_distribution_major_version }}/{{ item }}" 
     dest: "/etc/selinux/centos/{{ item }}"
   register: sepolicy
   with_items:

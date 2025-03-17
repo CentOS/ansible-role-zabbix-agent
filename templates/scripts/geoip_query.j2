@@ -33,12 +33,15 @@ fi
 
 # now creating ansible fact file
 cat > ${ansible_fact_file} << EOF
-[zabbix]
-location_lat: ${latitude}
-location_lon: ${longitude}
-site_country: ${country}
-site_state: ${state}
-site_city: ${city}
-location: ${continent}
+{
+  "zabbix": {
+    "location_lat": "${latitude}",
+    "location_lon": "${longitude}",
+    "site_country": "${country}",
+    "site_state": "${state}",
+    "site_city": "${city}",
+    "location": "${continent}"
+  }
+}
 EOF
 

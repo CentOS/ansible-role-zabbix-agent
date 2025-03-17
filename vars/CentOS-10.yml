@@ -1,0 +1,9 @@
+pkgs_list:
+  - policycoreutils-python-utils
+
+zabbix_pkgs_list:
+  - zabbix-agent
+  - zabbix-sender
+  - bc
+  - jq
+  - pciutils

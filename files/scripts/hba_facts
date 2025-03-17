@@ -3,10 +3,18 @@ PATH=$PATH:/usr/local/bin:/sbin:/usr/sbin/
 
 fact_file="/etc/ansible/facts.d/hba.fact"
 cat > ${fact_file} << EOF
-[adapters]
+{
+  "adapters": {
 EOF
 
 for kmod in 3w_9xxx 3w_xxxx arcmsr megaraid_sas mpi3mr aacraid; do
-  lsmod|egrep -q ${kmod} && echo "${kmod}=True" >> $fact_file || echo "${kmod}=False" >> $fact_file 
+  lsmod|grep -E -q ${kmod} && echo "    \"${kmod}\": \"True\"," >> $fact_file || echo "    \"${kmod}\": \"False\"," >> $fact_file 
 done
+
+# Closing list with fake hba to finish list without comma and closing json
+cat >> ${fact_file} << EOF
+    "soundblaster": "False"
+  }
+}
+EOF
 

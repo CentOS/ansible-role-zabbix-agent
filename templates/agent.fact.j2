@@ -1,8 +1,11 @@
-[zabbix]
-hw_arch: {{ ansible_architecture }}
-type: {{ ansible_virtualization_role }}
-vendor: {{ ansible_system_vendor }}
-model: {{ ansible_product_name }}
-serialno_a: {{ ansible_product_serial }}
-os_full: {{ ansible_distribution }} {{ ansible_distribution_release }} {{ ansible_distribution_version }}
-os_short: {{ ansible_distribution }}
+{
+  "zabbix": {
+    "hw_arch": "{{ ansible_architecture }}",
+    "type": "{{ ansible_virtualization_role }}",
+    "vendor": "{{ ansible_system_vendor }}",
+    "model": "{{ ansible_product_name }}",
+    "serialno_a": "{{ ansible_product_serial }}",
+    "os_full": "{{ ansible_distribution }} {{ ansible_distribution_release }} {{ ansible_distribution_version }}",
+    "os_short": "{{ ansible_distribution }}"
+  }
+}
