@@ -30,6 +30,10 @@
   tags:
     - packages
 
+# FIXME !!!!
+# Temporary disabling selinux policies on el10 due to zabbix_agent_t running now unconfined
+# see https://gitlab.com/redhat/centos-stream/rpms/selinux-policy/-/commit/0ebb49f06303e47a2dec7fb12ac952cc5a407e2d
+# some modules/types are now removed from BaseOS selinux-policy-targeted pkg so disabling for now but to be fixed/added back somehow
 - name: Distributing custom selinux policies
   copy: 
     src: "selinux/{{ ansible_distribution_major_version }}/{{ item }}" 
@@ -37,17 +41,25 @@
   register: sepolicy
   with_items:
     - centos-zabbix-agent.pp
+  when:
+    - ansible_selinux.status == 'enabled'
+    - ansible_distribution_major_version|int < 10
 
 - name: reload custom selinux files
   shell: /usr/sbin/semodule -u "/etc/selinux/centos/centos-zabbix-agent.pp"
-  when: ansible_selinux.status == "enabled" and sepolicy.changed
+  when: 
+    - ansible_selinux.status == "enabled" 
+    - sepolicy is changed
+    - ansible_distribution_major_version|int < 10
 
 - name: Allowing zabbix to connect to network resources
   seboolean: 
     name: zabbix_can_network 
     persistent: yes 
     state: yes
-  when: ansible_selinux.status == "enabled" 
+  when: 
+    - ansible_selinux.status == "enabled" 
+    - ansible_distribution_major_version|int < 10
 
 - name: Distributing PSK file for TLS
   template:
