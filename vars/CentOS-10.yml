@@ -1,5 +1,6 @@
 pkgs_list:
   - policycoreutils-python-utils
+  - selinux-policy-targeted-extra
 
 zabbix_pkgs_list:
   - zabbix-agent
