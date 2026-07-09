@@ -1,19 +1,29 @@
-policy_module(centos-zabbix-agent, 1.1)
+policy_module(centos-zabbix-agent, 1.2)
 
 require{
  type zabbix_agent_t;
  type zabbix_t;
  type ping_t;
  type zabbix_tmp_t;
+ type systemd_systemctl_exec_t;                                                                                                                        
  class process setrlimit;
+ class unix_stream_socket connectto;                                                                                                                   
+ class file execute;       
+ class file execute_no_trans;
+ attribute systemd_unit_file_type;
+ class service status;
 }
 
 allow ping_t zabbix_tmp_t:file read_file_perms;
 allow ping_t zabbix_t:tcp_socket { read write };
 allow zabbix_agent_t self:process setrlimit;
+allow zabbix_agent_t systemd_systemctl_exec_t:file execute;
+allow zabbix_agent_t systemd_systemctl_exec_t:file execute_no_trans;
+allow zabbix_agent_t systemd_unit_file_type:service status;
 
 kernel_read_network_state(zabbix_agent_t)
 domain_read_all_domains_state(zabbix_agent_t)
 dev_read_sysfs(zabbix_agent_t)
 corenet_tcp_connect_all_ports(zabbix_agent_t)
+
 
