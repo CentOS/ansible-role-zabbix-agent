@@ -86,10 +86,13 @@
 - name: Ensuring we have a directory to put zabbix scripts
   file:
     state: directory
-    path: /usr/lib/zabbix
+    path: "{{ item }}"
     mode: 0770
     owner: zabbix
     group: zabbix
+  with_items:
+    - /usr/lib/zabbix
+    - /var/lib/zabbix
 
 - name: Adding some other conf files under zabbix_agentd.d
   template: 
